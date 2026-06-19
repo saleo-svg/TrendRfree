@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
@@ -82,3 +82,18 @@ jobs:
           S3_REGION: ${{ secrets.S3_REGION }}
           GITHUB_ACTIONS: true
         run: uv run python -m trendradar
+
+      - name: Deploy report to GitHub Pages
+        if: success()
+        run: |
+          if [ -f "output/index.html" ]; then
+            cp output/index.html index.html
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git diff --cached --quiet && echo "No changes to commit" || git commit -m "ci: update latest report $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push origin HEAD:refs/heads/gh-pages --force
+          else
+            echo "Warning: output/index.html not found, skipping Pages deploy"
+          fi
+        working-directory: ${{ github.workspace }}
