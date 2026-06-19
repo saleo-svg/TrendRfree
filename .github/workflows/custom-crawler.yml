@@ -1,4 +1,4 @@
-name: TrendRadar 每日热点推送（免费方案）
+name: TrendRfree
 
 on:
   schedule:
